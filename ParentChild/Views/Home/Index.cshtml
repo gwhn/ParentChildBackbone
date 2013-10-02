@@ -68,26 +68,32 @@
                     createParent: function (event) {
                         event.preventDefault();
                         this.trigger('create:parent');
+                        this.remove();
                     },
                     editParent: function (event) {
                         event.preventDefault();
                         this.trigger('edit:parent', $(event.currentTarget).data('id'));
+                        this.remove();
                     },
                     destroyParent: function (event) {
                         event.preventDefault();
                         this.trigger('destroy:parent', $(event.currentTarget).data('id'));
+                        this.remove();
                     },
                     createChild: function (event) {
                         event.preventDefault();
                         this.trigger('create:child', $(event.currentTarget).data('id'));
+                        this.remove();
                     },
                     editChild: function (event) {
                         event.preventDefault();
                         this.trigger('edit:child', $(event.currentTarget).data('id'));
+                        this.remove();
                     },
                     destroyChild: function (event) {
                         event.preventDefault();
                         this.trigger('destroy:child', $(event.currentTarget).data('id'));
+                        this.remove();
                     }
                 });
 
@@ -109,12 +115,12 @@
                         var model = new Models.Parent({
                             Id: this.model.get('Id')
                         });
-                        model.on('sync', function () {
+                        this.listenToOnce(model, 'sync', function () {
                             var view = new ChildrenList({
                                 collection: new Collections.Children(model.get('Children'))
                             });
                             this.$el.append(view.render().el);
-                        }, this);
+                        });
                         model.fetch();
                     }
                 });
@@ -163,10 +169,10 @@
                         'submit': 'save'
                     },
                     initialize: function() {
-                        this.model.once('sync', function(model) {
-                            this.remove();
+                        this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('created:parent', model);
-                        }, this);
+                            this.remove();
+                        });
                     },
                     render: function() {
                         this.$el.html(this.template());
@@ -180,8 +186,8 @@
                     },
                     cancel: function (event) {
                         event.preventDefault();
-                        this.remove();
                         this.trigger('cancelled:parent');
+                        this.remove();
                     }
                 });
 
@@ -201,10 +207,10 @@
                         'submit': 'update'
                     },
                     initialize: function() {
-                        this.model.once('sync', function(model) {
-                            this.remove();
+                        this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('updated:parent', model);
-                        }, this);
+                            this.remove();
+                        });
                     },
                     render: function() {
                         this.$el.html(this.template(this.model.toJSON()));
@@ -218,8 +224,8 @@
                     },
                     cancel: function (event) {
                         event.preventDefault();
-                        this.remove();
                         this.trigger('cancelled:parent');
+                        this.remove();
                     }
                 });
 
@@ -238,10 +244,10 @@
                         'submit': 'cancel'
                     },
                     initialize: function() {
-                        this.model.once('sync', function() {
-                            this.remove();
+                        this.listenToOnce(this.model, 'sync', function () {
                             this.trigger('destroyed:parent');
-                        }, this);
+                            this.remove();
+                        });
                     },
                     render: function() {
                         this.$el.html(this.template(this.model.toJSON()));
@@ -253,8 +259,8 @@
                     },
                     cancel: function (event) {
                         event.preventDefault();
-                        this.remove();
                         this.trigger('cancelled:parent');
+                        this.remove();
                     }
                 });
 
@@ -274,10 +280,10 @@
                         'submit': 'save'
                     },
                     initialize: function () {
-                        this.model.once('sync', function (model) {
-                            this.remove();
+                        this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('created:child', model);
-                        }, this);
+                            this.remove();
+                        });
                     },
                     render: function () {
                         this.$el.html(this.template());
@@ -291,8 +297,8 @@
                     },
                     cancel: function (event) {
                         event.preventDefault();
-                        this.remove();
                         this.trigger('cancelled:child');
+                        this.remove();
                     }
                 });
 
@@ -312,10 +318,10 @@
                         'submit': 'update'
                     },
                     initialize: function () {
-                        this.model.once('sync', function (model) {
-                            this.remove();
+                        this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('updated:child', model);
-                        }, this);
+                            this.remove();
+                        });
                     },
                     render: function () {
                         this.$el.html(this.template(this.model.toJSON()));
@@ -329,8 +335,8 @@
                     },
                     cancel: function (event) {
                         event.preventDefault();
-                        this.remove();
                         this.trigger('cancelled:child');
+                        this.remove();
                     }
                 });
 
@@ -349,10 +355,10 @@
                         'submit': 'cancel'
                     },
                     initialize: function () {
-                        this.model.once('sync', function () {
-                            this.remove();
+                        this.listenToOnce(this.model, 'sync', function () {
                             this.trigger('destroyed:child');
-                        }, this);
+                            this.remove();
+                        });
                     },
                     render: function () {
                         this.$el.html(this.template(this.model.toJSON()));
@@ -364,8 +370,8 @@
                     },
                     cancel: function (event) {
                         event.preventDefault();
-                        this.remove();
                         this.trigger('cancelled:child');
+                        this.remove();
                     }
                 });
 
@@ -374,36 +380,36 @@
                         var view = new ParentsList({
                             collection: this.collection
                         });
-                        view.on('create:parent', this.createParent, this);
-                        view.on('edit:parent', this.editParent, this);
-                        view.on('destroy:parent', this.destroyParent, this);
-                        view.on('create:child', this.createChild, this);
-                        view.on('edit:child', this.editChild, this);
-                        view.on('destroy:child', this.destroyChild, this);
+                        this.listenTo(view, 'create:parent', this.createParent);
+                        this.listenTo(view, 'edit:parent', this.editParent);
+                        this.listenTo(view, 'destroy:parent', this.destroyParent);
+                        this.listenTo(view, 'create:child', this.createChild);
+                        this.listenTo(view, 'edit:child', this.editChild);
+                        this.listenTo(view, 'destroy:child', this.destroyChild);
                         this.$el.html(view.render().el);
                     },
                     createParent: function () {
                         var view = new ParentCreate({
                             model: new Models.Parent()
                         });
-                        view.on('created:parent', function (model) {
+                        this.listenTo(view, 'created:parent', function (model) {
                             this.collection.add(model);
-                        }, this);
-                        view.on('created:parent cancelled:parent', this.render, this);
+                        });
+                        this.listenTo(view, 'created:parent cancelled:parent', this.render);
                         this.$el.html(view.render().el);
                     },
                     editParent: function (id) {
                         var view = new ParentEdit({
                             model: this.collection.get(id)
                         });
-                        view.on('updated:parent cancelled:parent', this.render, this);
+                        this.listenTo(view, 'updated:parent cancelled:parent', this.render);
                         this.$el.html(view.render().el);
                     },
                     destroyParent: function (id) {
                         var view = new ParentDestroy({
                             model: this.collection.get(id)
                         });
-                        view.on('destroyed:parent cancelled:parent', this.render, this);
+                        this.listenTo(view, 'destroyed:parent cancelled:parent', this.render);
                         this.$el.html(view.render().el);
                     },
                     createChild: function (parentId) {
@@ -412,31 +418,31 @@
                                 ParentId: parentId
                             })
                         });
-                        view.on('created:child cancelled:child', this.render, this);
+                        this.listenTo(view, 'created:child cancelled:child', this.render);
                         this.$el.html(view.render().el);
                     },
                     editChild: function (id) {
                         var model = new Models.Child({
                             Id: id
                         });
-                        model.on('sync', function() {
+                        this.listenToOnce(model, 'sync', function() {
                             var view = new ChildEdit({
                                 model: model
                             });
-                            view.on('updated:child cancelled:child', this.render, this);
+                            this.listenTo(view, 'updated:child cancelled:child', this.render);
                             this.$el.html(view.render().el);
-                        }, this);
+                        });
                         model.fetch();
                     },
                     destroyChild: function (id) {
                         var model = new Models.Child({
                             Id: id
                         });
-                        model.on('sync', function () {
+                        this.listenToOnce(model, 'sync', function () {
                             var view = new ChildDestroy({
                                 model: model
                             });
-                            view.on('destroyed:child cancelled:child', this.render, this);
+                            this.listenTo(view, 'destroyed:child cancelled:child', this.render);
                             this.$el.html(view.render().el);
                         }, this);
                         model.fetch();
