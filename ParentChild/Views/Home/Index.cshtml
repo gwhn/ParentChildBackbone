@@ -1,0 +1,477 @@
+﻿@model IEnumerable<ParentChild.Models.Parent>
+
+<section id="application"></section>
+
+@section scripts
+{
+    <script>
+        var ParentChild = function() {
+            var Models = (function() {
+                var Parent = Backbone.Model.extend({
+                    idAttribute: 'Id',
+                    urlRoot: 'api/parent'
+                });
+
+                var Child = Backbone.Model.extend({
+                    idAttribute: 'Id',
+                    urlRoot: 'api/child'
+                });
+
+                return {
+                    Parent: Parent,
+                    Child: Child
+                };
+            })();
+
+            var Collections = (function() {
+                var Parents = Backbone.Collection.extend({
+                    model: Models.Parent,
+                    url: 'api/parent'
+                });
+
+                var Children = Backbone.Collection.extend({
+                    model: Models.Child,
+                    url: 'api/child'
+                });
+
+                return {
+                    Parents: Parents,
+                    Children: Children
+                };
+            })();
+
+            var Views = (function() {
+                var ParentsList = Backbone.View.extend({
+                    tagName: 'form',
+                    template: _.template(
+                        '<input type="button" name="createParent" value="Create Parent" />'
+                    ),
+                    events: {
+                        'submit': 'createParent',
+                        'click input[name=createParent]': 'createParent',
+                        'click input[name=editParent]': 'editParent',
+                        'click input[name=destroyParent]': 'destroyParent',
+                        'click input[name=createChild]': 'createChild',
+                        'click input[name=editChild]': 'editChild',
+                        'click input[name=destroyChild]': 'destroyChild'
+                    },
+                    render: function() {
+                        this.$el.html(this.template());
+                        this.collection.each(function(model) {
+                            var view = new ParentsListItem({
+                                model: model
+                            });
+                            this.$el.append(view.render().el);
+                        }, this);
+                        return this;
+                    },
+                    createParent: function (event) {
+                        event.preventDefault();
+                        this.trigger('create:parent');
+                    },
+                    editParent: function (event) {
+                        event.preventDefault();
+                        this.trigger('edit:parent', $(event.currentTarget).data('id'));
+                    },
+                    destroyParent: function (event) {
+                        event.preventDefault();
+                        this.trigger('destroy:parent', $(event.currentTarget).data('id'));
+                    },
+                    createChild: function (event) {
+                        event.preventDefault();
+                        this.trigger('create:child', $(event.currentTarget).data('id'));
+                    },
+                    editChild: function (event) {
+                        event.preventDefault();
+                        this.trigger('edit:child', $(event.currentTarget).data('id'));
+                    },
+                    destroyChild: function (event) {
+                        event.preventDefault();
+                        this.trigger('destroy:child', $(event.currentTarget).data('id'));
+                    }
+                });
+
+                var ParentsListItem = Backbone.View.extend({
+                    template: _.template(
+                        '<label>' +
+                        '{{Name}}' +
+                        '<input type="button" name="createChild" value="Create Child" data-id="{{Id}}" />' +
+                        '<input type="button" name="editParent" value="Edit" data-id="{{Id}}" />' +
+                        '<input type="button" name="destroyParent" value="Destroy" data-id="{{Id}}" />' +
+                        '</label>'
+                    ),
+                    render: function() {
+                        this.$el.html(this.template(this.model.toJSON()));
+                        this.renderChildren();
+                        return this;
+                    },
+                    renderChildren: function() {
+                        var model = new Models.Parent({
+                            Id: this.model.get('Id')
+                        });
+                        model.on('sync', function () {
+                            var view = new ChildrenList({
+                                collection: new Collections.Children(model.get('Children'))
+                            });
+                            this.$el.append(view.render().el);
+                        }, this);
+                        model.fetch();
+                    }
+                });
+
+                var ChildrenList = Backbone.View.extend({
+                    tagName: 'ul',
+                    render: function () {
+                        this.collection.each(function (model) {
+                            var view = new ChildrenListItem({
+                                model: model
+                            });
+                            this.$el.append(view.render().el);
+                        }, this);
+                        return this;
+                    }
+                });
+
+                var ChildrenListItem = Backbone.View.extend({
+                    tagName: 'li',
+                    template: _.template(
+                        '<label>' +
+                        '{{Name}}' +
+                        '<input type="button" name="editChild" value="Edit" data-id="{{Id}}" />' +
+                        '<input type="button" name="destroyChild" value="Destroy" data-id="{{Id}}" />' +
+                        '</label>'
+                    ),
+                    render: function () {
+                        this.$el.html(this.template(this.model.toJSON()));
+                        return this;
+                    }
+                });
+
+                var ParentCreate = Backbone.View.extend({
+                    tagName: 'form',
+                    template: _.template(
+                        '<label>' +
+                        'Parent Name' +
+                        '<input type="text" name="name" />' +
+                        '</label>' +
+                        '<input type="button" name="save" value="Save" />' +
+                        '<input type="button" name="cancel" value="Cancel" />'
+                    ),
+                    events: {
+                        'click input[name=save]': 'save',
+                        'click input[name=cancel]': 'cancel',
+                        'submit': 'save'
+                    },
+                    initialize: function() {
+                        this.model.once('sync', function(model) {
+                            this.remove();
+                            this.trigger('created:parent', model);
+                        }, this);
+                    },
+                    render: function() {
+                        this.$el.html(this.template());
+                        return this;
+                    },
+                    save: function(event) {
+                        event.preventDefault();
+                        this.model.save({
+                            Name: this.$('input[name=name]').val()
+                        });
+                    },
+                    cancel: function (event) {
+                        event.preventDefault();
+                        this.remove();
+                        this.trigger('cancelled:parent');
+                    }
+                });
+
+                var ParentEdit = Backbone.View.extend({
+                    tagName: 'form',
+                    template: _.template(
+                        '<label>' +
+                        'Parent Name' +
+                        '<input type="text" name="name" value="{{Name}}" />' +
+                        '</label>' +
+                        '<input type="button" name="update" value="Update" />' +
+                        '<input type="button" name="cancel" value="Cancel" />'
+                    ),
+                    events: {
+                        'click input[name=update]': 'update',
+                        'click input[name=cancel]': 'cancel',
+                        'submit': 'update'
+                    },
+                    initialize: function() {
+                        this.model.once('sync', function(model) {
+                            this.remove();
+                            this.trigger('updated:parent', model);
+                        }, this);
+                    },
+                    render: function() {
+                        this.$el.html(this.template(this.model.toJSON()));
+                        return this;
+                    },
+                    update: function(event) {
+                        event.preventDefault();
+                        this.model.save({
+                            Name: this.$('input[name=name]').val()
+                        });
+                    },
+                    cancel: function (event) {
+                        event.preventDefault();
+                        this.remove();
+                        this.trigger('cancelled:parent');
+                    }
+                });
+
+                var ParentDestroy = Backbone.View.extend({
+                    tagName: 'form',
+                    template: _.template(
+                        '<label>' +
+                        'Are you sure you want to destroy {{Name}}?' +
+                        '<input type="button" name="confirm" value="Yes" />' +
+                        '<input type="button" name="cancel" value="No" />' +
+                        '</label>'
+                    ),
+                    events: {
+                        'click input[name=confirm]': 'confirm',
+                        'click input[name=cancel]': 'cancel',
+                        'submit': 'cancel'
+                    },
+                    initialize: function() {
+                        this.model.once('sync', function() {
+                            this.remove();
+                            this.trigger('destroyed:parent');
+                        }, this);
+                    },
+                    render: function() {
+                        this.$el.html(this.template(this.model.toJSON()));
+                        return this;
+                    },
+                    confirm: function (event) {
+                        event.preventDefault();
+                        this.model.destroy();
+                    },
+                    cancel: function (event) {
+                        event.preventDefault();
+                        this.remove();
+                        this.trigger('cancelled:parent');
+                    }
+                });
+
+                var ChildCreate = Backbone.View.extend({
+                    tagName: 'form',
+                    template: _.template(
+                        '<label>' +
+                        'Child Name' +
+                        '<input type="text" name="name" />' +
+                        '</label>' + 
+                        '<input type="button" name="save" value="Save" />' + 
+                        '<input type="button" name="cancel" value="Cancel" />'
+                    ),
+                    events: {
+                        'click input[name=save]': 'save',
+                        'click input[name=cancel]': 'cancel',
+                        'submit': 'save'
+                    },
+                    initialize: function () {
+                        this.model.once('sync', function (model) {
+                            this.remove();
+                            this.trigger('created:child', model);
+                        }, this);
+                    },
+                    render: function () {
+                        this.$el.html(this.template());
+                        return this;
+                    },
+                    save: function (event) {
+                        event.preventDefault();
+                        this.model.save({
+                            Name: this.$('input[name=name]').val()
+                        });
+                    },
+                    cancel: function (event) {
+                        event.preventDefault();
+                        this.remove();
+                        this.trigger('cancelled:child');
+                    }
+                });
+
+                var ChildEdit = Backbone.View.extend({
+                    tagName: 'form',
+                    template: _.template(
+                        '<label>' +
+                        'Child Name' +
+                        '<input type="text" name="name" value="{{Name}}" />' +
+                        '</label>' +
+                        '<input type="button" name="update" value="Update" />' +
+                        '<input type="button" name="cancel" value="Cancel" />'
+                    ),
+                    events: {
+                        'click input[name=update]': 'update',
+                        'click input[name=cancel]': 'cancel',
+                        'submit': 'update'
+                    },
+                    initialize: function () {
+                        this.model.once('sync', function (model) {
+                            this.remove();
+                            this.trigger('updated:child', model);
+                        }, this);
+                    },
+                    render: function () {
+                        this.$el.html(this.template(this.model.toJSON()));
+                        return this;
+                    },
+                    update: function (event) {
+                        event.preventDefault();
+                        this.model.save({
+                            Name: this.$('input[name=name]').val()
+                        });
+                    },
+                    cancel: function (event) {
+                        event.preventDefault();
+                        this.remove();
+                        this.trigger('cancelled:child');
+                    }
+                });
+
+                var ChildDestroy = Backbone.View.extend({
+                    tagName: 'form',
+                    template: _.template(
+                        '<label>' +
+                        'Are you sure you want to destroy {{Name}}?' +
+                        '<input type="button" name="confirm" value="Yes" />' +
+                        '<input type="button" name="cancel" value="No" />' +
+                        '</label>'
+                    ),
+                    events: {
+                        'click input[name=confirm]': 'confirm',
+                        'click input[name=cancel]': 'cancel',
+                        'submit': 'cancel'
+                    },
+                    initialize: function () {
+                        this.model.once('sync', function () {
+                            this.remove();
+                            this.trigger('destroyed:child');
+                        }, this);
+                    },
+                    render: function () {
+                        this.$el.html(this.template(this.model.toJSON()));
+                        return this;
+                    },
+                    confirm: function (event) {
+                        event.preventDefault();
+                        this.model.destroy();
+                    },
+                    cancel: function (event) {
+                        event.preventDefault();
+                        this.remove();
+                        this.trigger('cancelled:child');
+                    }
+                });
+
+                var Application = Backbone.View.extend({
+                    render: function () {
+                        var view = new ParentsList({
+                            collection: this.collection
+                        });
+                        view.on('create:parent', this.createParent, this);
+                        view.on('edit:parent', this.editParent, this);
+                        view.on('destroy:parent', this.destroyParent, this);
+                        view.on('create:child', this.createChild, this);
+                        view.on('edit:child', this.editChild, this);
+                        view.on('destroy:child', this.destroyChild, this);
+                        this.$el.html(view.render().el);
+                    },
+                    createParent: function () {
+                        var view = new ParentCreate({
+                            model: new Models.Parent()
+                        });
+                        view.on('created:parent', function (model) {
+                            this.collection.add(model);
+                        }, this);
+                        view.on('created:parent cancelled:parent', this.render, this);
+                        this.$el.html(view.render().el);
+                    },
+                    editParent: function (id) {
+                        var view = new ParentEdit({
+                            model: this.collection.get(id)
+                        });
+                        view.on('updated:parent cancelled:parent', this.render, this);
+                        this.$el.html(view.render().el);
+                    },
+                    destroyParent: function (id) {
+                        var view = new ParentDestroy({
+                            model: this.collection.get(id)
+                        });
+                        view.on('destroyed:parent cancelled:parent', this.render, this);
+                        this.$el.html(view.render().el);
+                    },
+                    createChild: function (parentId) {
+                        var view = new ChildCreate({
+                            model: new Models.Child({
+                                ParentId: parentId
+                            })
+                        });
+                        view.on('created:child cancelled:child', this.render, this);
+                        this.$el.html(view.render().el);
+                    },
+                    editChild: function (id) {
+                        var model = new Models.Child({
+                            Id: id
+                        });
+                        model.on('sync', function() {
+                            var view = new ChildEdit({
+                                model: model
+                            });
+                            view.on('updated:child cancelled:child', this.render, this);
+                            this.$el.html(view.render().el);
+                        }, this);
+                        model.fetch();
+                    },
+                    destroyChild: function (id) {
+                        var model = new Models.Child({
+                            Id: id
+                        });
+                        model.on('sync', function () {
+                            var view = new ChildDestroy({
+                                model: model
+                            });
+                            view.on('destroyed:child cancelled:child', this.render, this);
+                            this.$el.html(view.render().el);
+                        }, this);
+                        model.fetch();
+                    }
+                });
+
+                return {
+                    Application: Application
+                };
+            })();
+
+            return {
+                Models: Models,
+                Collections: Collections,
+                Views: Views
+            };
+        };
+
+        $(function() {
+            _.templateSettings = {
+                interpolate: /\{\{(.+?)\}\}/g
+            };
+
+            var parentChild = new ParentChild();
+
+            var collection = new parentChild.Collections.Parents(
+                @Html.Raw(Json.Encode(Model))
+            );
+
+            var application = new parentChild.Views.Application({
+                el: '#application',
+                collection: collection
+            });
+
+            application.render();
+        });
+    </script>
+}
