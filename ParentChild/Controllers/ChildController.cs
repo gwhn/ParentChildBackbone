@@ -58,7 +58,7 @@ namespace ParentChild.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, ex);
             }
 
-            return Request.CreateResponse(HttpStatusCode.OK);
+            return Request.CreateResponse(HttpStatusCode.OK, child);
         }
 
         // POST api/Child

@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<ParentChild.Models.Parent>
 
+<section id="message"></section>
 <section id="application"></section>
 
 @section scripts
@@ -17,9 +18,12 @@
                     urlRoot: 'api/child'
                 });
 
+                var Alert = Backbone.Model.extend();
+                
                 return {
                     Parent: Parent,
-                    Child: Child
+                    Child: Child,
+                    Alert: Alert
                 };
             })();
 
@@ -170,6 +174,10 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('created:parent', model);
+                            this.trigger('message:created:parent', new Models.Alert({
+                                Type: 'success',
+                                Message: 'Parent ' + model.get('Name') + ' created'
+                            }));
                             this.remove();
                         });
                     },
@@ -208,6 +216,10 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('updated:parent', model);
+                            this.trigger('message:updated:parent', new Models.Alert({
+                                Type: 'success',
+                                Message: 'Parent ' + model.get('Name') + ' updated'
+                            }));
                             this.remove();
                         });
                     },
@@ -243,8 +255,12 @@
                         'submit': 'cancel'
                     },
                     initialize: function() {
-                        this.listenToOnce(this.model, 'sync', function() {
+                        this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('destroyed:parent');
+                            this.trigger('message:destroyed:parent', new Models.Alert({
+                                Type: 'success',
+                                Message: 'Parent ' + model.get('Name') + ' destroyed'
+                            }));
                             this.remove();
                         });
                     },
@@ -281,6 +297,10 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('created:child', model);
+                            this.trigger('message:created:child', new Models.Alert({
+                                Type: 'success',
+                                Message: 'Child ' + model.get('Name') + ' created'
+                            }));
                             this.remove();
                         });
                     },
@@ -319,6 +339,10 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('updated:child', model);
+                            this.trigger('message:updated:child', new Models.Alert({
+                                Type: 'success',
+                                Message: 'Child ' + model.get('Name') + ' updated'
+                            }));
                             this.remove();
                         });
                     },
@@ -354,8 +378,12 @@
                         'submit': 'cancel'
                     },
                     initialize: function() {
-                        this.listenToOnce(this.model, 'sync', function() {
+                        this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('destroyed:child');
+                            this.trigger('message:destroyed:child', new Models.Alert({
+                                Type: 'success',
+                                Message: 'Child ' + model.get('Name') + ' destroyed'
+                            }));
                             this.remove();
                         });
                     },
@@ -374,7 +402,22 @@
                     }
                 });
 
+                var Message = Backbone.View.extend({
+                    template: _.template(
+                        '<div class="alert alert-{{Type}}">{{Message}}</div>'
+                    ),
+                    render: function() {
+                        this.$el.html(this.template(this.model.toJSON()));
+                        return this;
+                    }
+                });
+                
                 var Application = Backbone.View.extend({
+                    initialize: function() {
+                        this.message = new Message({
+                            el: '#message'
+                        });
+                    },
                     render: function() {
                         var view = new ParentsList({
                             collection: this.collection
@@ -387,6 +430,10 @@
                         this.listenTo(view, 'destroy:child', this.destroyChild);
                         this.$el.html(view.render().el);
                     },
+                    showMessage: function(alert) {
+                        this.message.model = alert;
+                        this.message.render();
+                    },
                     createParent: function() {
                         var view = new ParentCreate({
                             model: new Models.Parent()
@@ -395,6 +442,7 @@
                             this.collection.add(model);
                         });
                         this.listenTo(view, 'created:parent cancelled:parent', this.render);
+                        this.listenTo(view, 'message:created:parent', this.showMessage);
                         this.$el.html(view.render().el);
                     },
                     editParent: function(id) {
@@ -402,6 +450,7 @@
                             model: this.collection.get(id)
                         });
                         this.listenTo(view, 'updated:parent cancelled:parent', this.render);
+                        this.listenTo(view, 'message:updated:parent', this.showMessage);
                         this.$el.html(view.render().el);
                     },
                     destroyParent: function(id) {
@@ -409,6 +458,7 @@
                             model: this.collection.get(id)
                         });
                         this.listenTo(view, 'destroyed:parent cancelled:parent', this.render);
+                        this.listenTo(view, 'message:destroyed:parent', this.showMessage);
                         this.$el.html(view.render().el);
                     },
                     createChild: function(parentId) {
@@ -418,6 +468,7 @@
                             })
                         });
                         this.listenTo(view, 'created:child cancelled:child', this.render);
+                        this.listenTo(view, 'message:created:child', this.showMessage);
                         this.$el.html(view.render().el);
                     },
                     editChild: function (id) {
@@ -426,6 +477,7 @@
                                 model: model
                             });
                             this.listenTo(view, 'updated:child cancelled:child', this.render);
+                            this.listenTo(view, 'message:updated:child', this.showMessage);
                             this.$el.html(view.render().el);
                         });
                     },
@@ -435,6 +487,7 @@
                                 model: model
                             });
                             this.listenTo(view, 'destroyed:child cancelled:child', this.render);
+                            this.listenTo(view, 'message:destroyed:child', this.showMessage);
                             this.$el.html(view.render().el);
                         });
                     },
