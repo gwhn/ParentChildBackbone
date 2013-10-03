@@ -1,5 +1,18 @@
 ﻿@model IEnumerable<ParentChild.Models.Parent>
 
+<header>
+    <nav class="navbar navbar-static-top navbar-inverse" role="navigation">
+        <a class="navbar-brand" href="#">PCB</a>
+        <form id="search" class="navbar-form form-inline" role="search">
+            <div class="input-group">
+                <input type="text" name="query" class="form-control" placeholder="Search"/>
+                <span class="input-group-btn">
+                    <input type="submit" name="search" class="btn btn-default" value="Go" />
+                </span> 
+            </div>
+        </form>
+    </nav>
+</header>
 <section id="message"></section>
 <section id="application"></section>
 
@@ -44,20 +57,20 @@
                 };
             })();
 
-            var Views = (function() {
+            var Views = (function () {
                 var ParentsList = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<input type="button" name="createParent" value="Create Parent" />'
+                        '<button type="button" class="btn btn-link" name="createParent">Create Parent</button>'
                     ),
                     events: {
                         'submit': 'createParent',
-                        'click input[name=createParent]': 'createParent',
-                        'click input[name=editParent]': 'editParent',
-                        'click input[name=destroyParent]': 'destroyParent',
-                        'click input[name=createChild]': 'createChild',
-                        'click input[name=editChild]': 'editChild',
-                        'click input[name=destroyChild]': 'destroyChild'
+                        'click button[name=createParent]': 'createParent',
+                        'click button[name=editParent]': 'editParent',
+                        'click button[name=destroyParent]': 'destroyParent',
+                        'click button[name=createChild]': 'createChild',
+                        'click button[name=editChild]': 'editChild',
+                        'click button[name=destroyChild]': 'destroyChild'
                     },
                     render: function() {
                         this.$el.html(this.template());
@@ -105,9 +118,9 @@
                     template: _.template(
                         '<label>' +
                         '{{Name}}' +
-                        '<input type="button" name="createChild" value="Create Child" data-id="{{Id}}" />' +
-                        '<input type="button" name="editParent" value="Edit" data-id="{{Id}}" />' +
-                        '<input type="button" name="destroyParent" value="Destroy" data-id="{{Id}}" />' +
+                        '<button type="button" class="btn btn-link" name="createChild" data-id="{{Id}}">Create Child</button>' +
+                        '<button type="button" class="btn btn-link" name="editParent" data-id="{{Id}}">Edit</button>' +
+                        '<button type="button" class="btn btn-link" name="destroyParent" data-id="{{Id}}">Destroy</button>' +
                         '</label>'
                     ),
                     render: function() {
@@ -129,7 +142,7 @@
                 });
 
                 var ChildrenList = Backbone.View.extend({
-                    tagName: 'ul',
+                    tagName: 'ol',
                     render: function() {
                         this.collection.each(function(model) {
                             var view = new ChildrenListItem({
@@ -146,8 +159,8 @@
                     template: _.template(
                         '<label>' +
                         '{{Name}}' +
-                        '<input type="button" name="editChild" value="Edit" data-id="{{Id}}" />' +
-                        '<input type="button" name="destroyChild" value="Destroy" data-id="{{Id}}" />' +
+                        '<button type="button" class="btn btn-link" name="editChild" data-id="{{Id}}">Edit</button>' +
+                        '<button type="button" class="btn btn-link" name="destroyChild" data-id="{{Id}}">Destroy</button>' +
                         '</label>'
                     ),
                     render: function() {
@@ -159,16 +172,16 @@
                 var ParentCreate = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label>' +
+                        '<label class="control-label">' +
                         'Parent Name' +
-                        '<input type="text" name="name" />' +
+                        '<input type="text" class="form-control" name="name" />' +
                         '</label>' +
-                        '<input type="button" name="save" value="Save" />' +
-                        '<input type="button" name="cancel" value="Cancel" />'
+                        '<button type="submit" class="btn btn-primary" name="save">Save</button>' +
+                        '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
-                        'click input[name=save]': 'save',
-                        'click input[name=cancel]': 'cancel',
+                        'click button[name=save]': 'save',
+                        'click button[name=cancel]': 'cancel',
                         'submit': 'save'
                     },
                     initialize: function() {
@@ -199,16 +212,16 @@
                 var ParentEdit = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label>' +
+                        '<label class="control-label">' +
                         'Parent Name' +
-                        '<input type="text" name="name" value="{{Name}}" />' +
+                        '<input type="text" class="form-control" name="name" value="{{Name}}" />' +
                         '</label>' +
-                        '<input type="button" name="update" value="Update" />' +
-                        '<input type="button" name="cancel" value="Cancel" />'
+                        '<button type="submit" class="btn btn-primary" name="update">Update</button>' +
+                        '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
-                        'click input[name=update]': 'update',
-                        'click input[name=cancel]': 'cancel',
+                        'click button[name=update]': 'update',
+                        'click button[name=cancel]': 'cancel',
                         'submit': 'update'
                     },
                     initialize: function() {
@@ -241,13 +254,13 @@
                     template: _.template(
                         '<label>' +
                         'Are you sure you want to destroy {{Name}}?' +
-                        '<input type="button" name="confirm" value="Yes" />' +
-                        '<input type="button" name="cancel" value="No" />' +
+                        '<button type="button" class="btn btn-danger" name="confirm">Yes</button>' +
+                        '<button type="submit" class="btn btn-primary" name="cancel">No</button>' +
                         '</label>'
                     ),
                     events: {
-                        'click input[name=confirm]': 'confirm',
-                        'click input[name=cancel]': 'cancel',
+                        'click button[name=confirm]': 'confirm',
+                        'click button[name=cancel]': 'cancel',
                         'submit': 'cancel'
                     },
                     initialize: function() {
@@ -276,16 +289,16 @@
                 var ChildCreate = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label>' +
+                        '<label class="control-label">' +
                         'Child Name' +
-                        '<input type="text" name="name" />' +
+                        '<input type="text" class="form-control" name="name" />' +
                         '</label>' +
-                        '<input type="button" name="save" value="Save" />' +
-                        '<input type="button" name="cancel" value="Cancel" />'
+                        '<button type="submit" class="btn btn-primary" name="save">Save</button>' +
+                        '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
-                        'click input[name=save]': 'save',
-                        'click input[name=cancel]': 'cancel',
+                        'click button[name=save]': 'save',
+                        'click button[name=cancel]': 'cancel',
                         'submit': 'save'
                     },
                     initialize: function() {
@@ -316,16 +329,16 @@
                 var ChildEdit = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label>' +
+                        '<label class="control-label">' +
                         'Child Name' +
-                        '<input type="text" name="name" value="{{Name}}" />' +
+                        '<input type="text" class="form-control" name="name" value="{{Name}}" />' +
                         '</label>' +
-                        '<input type="button" name="update" value="Update" />' +
-                        '<input type="button" name="cancel" value="Cancel" />'
+                        '<button type="submit" class="btn btn-primary" name="update">Update</button>' +
+                        '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
-                        'click input[name=update]': 'update',
-                        'click input[name=cancel]': 'cancel',
+                        'click button[name=update]': 'update',
+                        'click button[name=cancel]': 'cancel',
                         'submit': 'update'
                     },
                     initialize: function() {
@@ -358,13 +371,13 @@
                     template: _.template(
                         '<label>' +
                         'Are you sure you want to destroy {{Name}}?' +
-                        '<input type="button" name="confirm" value="Yes" />' +
-                        '<input type="button" name="cancel" value="No" />' +
+                        '<button type="button" class="btn btn-danger" name="confirm">Yes</button>' +
+                        '<button type="submit" class="btn btn-primary" name="cancel">No</button>' +
                         '</label>'
                     ),
                     events: {
-                        'click input[name=confirm]': 'confirm',
-                        'click input[name=cancel]': 'cancel',
+                        'click button[name=confirm]': 'confirm',
+                        'click button[name=cancel]': 'cancel',
                         'submit': 'cancel'
                     },
                     initialize: function() {
@@ -403,8 +416,24 @@
                     }
                 });
                 
+                var Search = Backbone.View.extend({
+                    events: {
+                        'submit': 'search'
+                    },
+                    search: function(event) {
+                        event.preventDefault();
+                        this.trigger('search', this.$('input[name=query]').val());
+                    }
+                });
+
                 var Application = Backbone.View.extend({
-                    initialize: function() {
+                    initialize: function () {
+                        this.search = new Search({
+                            el: '#search'
+                        });
+                        this.listenTo(this.search, 'search', function(query) {
+                            alert('search ' + query);
+                        });
                         this.message = new Message({
                             el: '#message',
                             model: new Models.Alert()
