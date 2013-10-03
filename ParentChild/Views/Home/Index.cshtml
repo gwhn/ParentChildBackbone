@@ -421,25 +421,26 @@
                         this.$el.html(view.render().el);
                     },
                     editChild: function (id) {
-                        var model = new Models.Child({ Id: id });
-                        this.listenToOnce(model, 'sync', function () {
+                        this.getChild(id, function(model) {
                             var view = new ChildEdit({
                                 model: model
                             });
                             this.listenTo(view, 'updated:child cancelled:child', this.render);
                             this.$el.html(view.render().el);
                         });
-                        model.fetch();
                     },
                     destroyChild: function (id) {
-                        var model = new Models.Child({ Id: id });
-                        this.listenToOnce(model, 'sync', function () {
+                        this.getChild(id, function (model) {
                             var view = new ChildDestroy({
                                 model: model
                             });
                             this.listenTo(view, 'destroyed:child cancelled:child', this.render);
                             this.$el.html(view.render().el);
                         });
+                    },
+                    getChild: function(id, callback) {
+                        var model = new Models.Child({ Id: id });
+                        this.listenToOnce(model, 'sync', callback);
                         model.fetch();
                     }
                 });
