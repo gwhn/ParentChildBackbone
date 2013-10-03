@@ -174,10 +174,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('created:parent', model);
-                            this.trigger('message:created:parent', new Models.Alert({
-                                Type: 'success',
-                                Message: 'Parent ' + model.get('Name') + ' created'
-                            }));
+                            this.trigger('message:created:parent', 'success', 'Parent ' + model.get('Name') + ' created');
                             this.remove();
                         });
                     },
@@ -216,10 +213,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('updated:parent', model);
-                            this.trigger('message:updated:parent', new Models.Alert({
-                                Type: 'success',
-                                Message: 'Parent ' + model.get('Name') + ' updated'
-                            }));
+                            this.trigger('message:updated:parent', 'success', 'Parent ' + model.get('Name') + ' updated');
                             this.remove();
                         });
                     },
@@ -257,10 +251,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('destroyed:parent');
-                            this.trigger('message:destroyed:parent', new Models.Alert({
-                                Type: 'success',
-                                Message: 'Parent ' + model.get('Name') + ' destroyed'
-                            }));
+                            this.trigger('message:destroyed:parent', 'success', 'Parent ' + model.get('Name') + ' destroyed');
                             this.remove();
                         });
                     },
@@ -297,10 +288,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('created:child', model);
-                            this.trigger('message:created:child', new Models.Alert({
-                                Type: 'success',
-                                Message: 'Child ' + model.get('Name') + ' created'
-                            }));
+                            this.trigger('message:created:child', 'success', 'Child ' + model.get('Name') + ' created');
                             this.remove();
                         });
                     },
@@ -339,10 +327,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('updated:child', model);
-                            this.trigger('message:updated:child', new Models.Alert({
-                                Type: 'success',
-                                Message: 'Child ' + model.get('Name') + ' updated'
-                            }));
+                            this.trigger('message:updated:child', 'success', 'Child ' + model.get('Name') + ' updated');
                             this.remove();
                         });
                     },
@@ -380,10 +365,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('destroyed:child');
-                            this.trigger('message:destroyed:child', new Models.Alert({
-                                Type: 'success',
-                                Message: 'Child ' + model.get('Name') + ' destroyed'
-                            }));
+                            this.trigger('message:destroyed:child', 'success', 'Child ' + model.get('Name') + ' destroyed');
                             this.remove();
                         });
                     },
@@ -406,6 +388,9 @@
                     template: _.template(
                         '<div class="alert alert-{{Type}}">{{Message}}</div>'
                     ),
+                    initialize: function() {
+                        this.listenTo(this.model, 'change', this.render);
+                    },
                     render: function() {
                         this.$el.html(this.template(this.model.toJSON()));
                         return this;
@@ -415,7 +400,8 @@
                 var Application = Backbone.View.extend({
                     initialize: function() {
                         this.message = new Message({
-                            el: '#message'
+                            el: '#message',
+                            model: new Models.Alert()
                         });
                     },
                     render: function() {
@@ -430,9 +416,11 @@
                         this.listenTo(view, 'destroy:child', this.destroyChild);
                         this.$el.html(view.render().el);
                     },
-                    showMessage: function(alert) {
-                        this.message.model = alert;
-                        this.message.render();
+                    showMessage: function(type, message) {
+                        this.message.model.set({
+                            Type: type,
+                            Message: message
+                        });
                     },
                     createParent: function() {
                         var view = new ParentCreate({
