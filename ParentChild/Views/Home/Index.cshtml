@@ -23,12 +23,22 @@
             var Models = (function() {
                 var Parent = Backbone.Model.extend({
                     idAttribute: 'Id',
-                    urlRoot: 'api/parent'
+                    urlRoot: 'api/parent',
+                    validate: function(attrs, options) {
+                        if (attrs.Name.length < 1) {
+                            return 'Parent name is required';
+                        }
+                    }
                 });
 
                 var Child = Backbone.Model.extend({
                     idAttribute: 'Id',
-                    urlRoot: 'api/child'
+                    urlRoot: 'api/child',
+                    validate: function (attrs, options) {
+                        if (attrs.Name.length < 1) {
+                            return 'Child name is required';
+                        }
+                    }
                 });
 
                 var Alert = Backbone.Model.extend();
@@ -177,6 +187,7 @@
                         'Parent Name\n' +
                         '<input type="text" class="form-control" name="name" />\n' +
                         '</label>\n' +
+                        '<span class="help-block"/>' +
                         '</div>\n' +
                         '<button type="submit" class="btn btn-primary" name="save">Save</button>\n' +
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
@@ -186,7 +197,11 @@
                         'click button[name=cancel]': 'cancel',
                         'submit': 'save'
                     },
-                    initialize: function() {
+                    initialize: function () {
+                        this.listenTo(this.model, 'invalid', function(model, error) {
+                            this.$('.form-group').addClass('has-error');
+                            this.$('.help-block').text(error);
+                        });
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('created:parent', model);
                             this.trigger('alert', 'success', 'Parent ' + model.get('Name') + ' saved');
@@ -219,6 +234,7 @@
                         'Parent Name\n' +
                         '<input type="text" class="form-control" name="name" value="{{Name}}" />\n' +
                         '</label>\n' +
+                        '<span class="help-block"/>' +
                         '</div>\n' +
                         '<button type="submit" class="btn btn-primary" name="update">Update</button>\n' +
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
@@ -229,7 +245,11 @@
                         'submit': 'update'
                     },
                     initialize: function() {
-                        this.listenToOnce(this.model, 'sync', function(model) {
+                        this.listenTo(this.model, 'invalid', function (model, error) {
+                            this.$('.form-group').addClass('has-error');
+                            this.$('.help-block').text(error);
+                        });
+                        this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('updated:parent', model);
                             this.trigger('alert', 'success', 'Parent ' + model.get('Name') + ' updated');
                             this.remove();
@@ -300,6 +320,7 @@
                         'Child Name\n' +
                         '<input type="text" class="form-control" name="name" />\n' +
                         '</label>\n' +
+                        '<span class="help-block"/>' +
                         '</div>\n' +
                         '<button type="submit" class="btn btn-primary" name="save">Save</button>\n' +
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
@@ -310,7 +331,11 @@
                         'submit': 'save'
                     },
                     initialize: function() {
-                        this.listenToOnce(this.model, 'sync', function(model) {
+                        this.listenTo(this.model, 'invalid', function (model, error) {
+                            this.$('.form-group').addClass('has-error');
+                            this.$('.help-block').text(error);
+                        });
+                        this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('created:child', model);
                             this.trigger('alert', 'success', 'Child ' + model.get('Name') + ' saved');
                             this.remove();
@@ -342,6 +367,7 @@
                         'Child Name\n' +
                         '<input type="text" class="form-control" name="name" value="{{Name}}" />\n' +
                         '</label>\n' +
+                        '<span class="help-block"/>' +
                         '</div>\n' +
                         '<button type="submit" class="btn btn-primary" name="update">Update</button>\n' +
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
@@ -352,7 +378,11 @@
                         'submit': 'update'
                     },
                     initialize: function() {
-                        this.listenToOnce(this.model, 'sync', function(model) {
+                        this.listenTo(this.model, 'invalid', function (model, error) {
+                            this.$('.form-group').addClass('has-error');
+                            this.$('.help-block').text(error);
+                        });
+                        this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('updated:child', model);
                             this.trigger('alert', 'success', 'Child ' + model.get('Name') + ' updated');
                             this.remove();
