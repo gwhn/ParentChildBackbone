@@ -116,11 +116,11 @@
 
                 var ParentsListItem = Backbone.View.extend({
                     template: _.template(
-                        '<label>' +
-                        '{{Name}}' +
-                        '<button type="button" class="btn btn-link" name="createChild" data-id="{{Id}}">Create Child</button>' +
-                        '<button type="button" class="btn btn-link" name="editParent" data-id="{{Id}}">Edit</button>' +
-                        '<button type="button" class="btn btn-link" name="destroyParent" data-id="{{Id}}">Destroy</button>' +
+                        '<label>\n' +
+                        '{{Name}}\n' +
+                        '<button type="button" class="btn btn-link" name="createChild" data-id="{{Id}}">Create Child</button>\n' +
+                        '<button type="button" class="btn btn-link" name="editParent" data-id="{{Id}}">Edit</button>\n' +
+                        '<button type="button" class="btn btn-link" name="destroyParent" data-id="{{Id}}">Destroy</button>\n' +
                         '</label>'
                     ),
                     render: function() {
@@ -157,10 +157,10 @@
                 var ChildrenListItem = Backbone.View.extend({
                     tagName: 'li',
                     template: _.template(
-                        '<label>' +
-                        '{{Name}}' +
-                        '<button type="button" class="btn btn-link" name="editChild" data-id="{{Id}}">Edit</button>' +
-                        '<button type="button" class="btn btn-link" name="destroyChild" data-id="{{Id}}">Destroy</button>' +
+                        '<label>\n' +
+                        '{{Name}}\n' +
+                        '<button type="button" class="btn btn-link" name="editChild" data-id="{{Id}}">Edit</button>\n' +
+                        '<button type="button" class="btn btn-link" name="destroyChild" data-id="{{Id}}">Destroy</button>\n' +
                         '</label>'
                     ),
                     render: function() {
@@ -172,11 +172,13 @@
                 var ParentCreate = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label class="control-label">' +
-                        'Parent Name' +
-                        '<input type="text" class="form-control" name="name" />' +
-                        '</label>' +
-                        '<button type="submit" class="btn btn-primary" name="save">Save</button>' +
+                        '<div class="form-group">\n' +
+                        '<label class="control-label">\n' +
+                        'Parent Name\n' +
+                        '<input type="text" class="form-control" name="name" />\n' +
+                        '</label>\n' +
+                        '</div>\n' +
+                        '<button type="submit" class="btn btn-primary" name="save">Save</button>\n' +
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
@@ -212,11 +214,13 @@
                 var ParentEdit = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label class="control-label">' +
-                        'Parent Name' +
-                        '<input type="text" class="form-control" name="name" value="{{Name}}" />' +
-                        '</label>' +
-                        '<button type="submit" class="btn btn-primary" name="update">Update</button>' +
+                        '<div class="form-group">\n' +
+                        '<label class="control-label">\n' +
+                        'Parent Name\n' +
+                        '<input type="text" class="form-control" name="name" value="{{Name}}" />\n' +
+                        '</label>\n' +
+                        '</div>\n' +
+                        '<button type="submit" class="btn btn-primary" name="update">Update</button>\n' +
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
@@ -252,11 +256,13 @@
                 var ParentDestroy = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label>' +
-                        'Are you sure you want to destroy {{Name}}?' +
-                        '<button type="button" class="btn btn-danger" name="confirm">Yes</button>' +
-                        '<button type="submit" class="btn btn-primary" name="cancel">No</button>' +
-                        '</label>'
+                        '<div class="form-group">\n' +
+                        '<label>\n' +
+                        'Are you sure you want to destroy {{Name}}?\n' +
+                        '</label>\n' +
+                        '</div>\n' +
+                        '<button type="button" class="btn btn-danger" name="confirm">Yes</button>\n' +
+                        '<button type="submit" class="btn btn-primary" name="cancel">No</button>'
                     ),
                     events: {
                         'click button[name=confirm]': 'confirm',
@@ -289,11 +295,13 @@
                 var ChildCreate = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label class="control-label">' +
-                        'Child Name' +
-                        '<input type="text" class="form-control" name="name" />' +
-                        '</label>' +
-                        '<button type="submit" class="btn btn-primary" name="save">Save</button>' +
+                        '<div class="form-group">\n' +
+                        '<label class="control-label">\n' +
+                        'Child Name\n' +
+                        '<input type="text" class="form-control" name="name" />\n' +
+                        '</label>\n' +
+                        '</div>\n' +
+                        '<button type="submit" class="btn btn-primary" name="save">Save</button>\n' +
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
@@ -329,11 +337,13 @@
                 var ChildEdit = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label class="control-label">' +
-                        'Child Name' +
-                        '<input type="text" class="form-control" name="name" value="{{Name}}" />' +
-                        '</label>' +
-                        '<button type="submit" class="btn btn-primary" name="update">Update</button>' +
+                        '<div class="form-group">\n' +
+                        '<label class="control-label">\n' +
+                        'Child Name\n' +
+                        '<input type="text" class="form-control" name="name" value="{{Name}}" />\n' +
+                        '</label>\n' +
+                        '</div>\n' +
+                        '<button type="submit" class="btn btn-primary" name="update">Update</button>\n' +
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
@@ -369,11 +379,13 @@
                 var ChildDestroy = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
-                        '<label>' +
-                        'Are you sure you want to destroy {{Name}}?' +
-                        '<button type="button" class="btn btn-danger" name="confirm">Yes</button>' +
-                        '<button type="submit" class="btn btn-primary" name="cancel">No</button>' +
-                        '</label>'
+                        '<div class="form-group">\n' +
+                        '<label>\n' +
+                        'Are you sure you want to destroy {{Name}}?\n' +
+                        '</label>\n' +
+                        '</div>\n' +
+                        '<button type="button" class="btn btn-danger" name="confirm">Yes</button>\n' +
+                        '<button type="submit" class="btn btn-primary" name="cancel">No</button>'
                     ),
                     events: {
                         'click button[name=confirm]': 'confirm',
