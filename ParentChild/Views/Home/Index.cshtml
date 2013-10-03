@@ -193,14 +193,14 @@
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
+                        'keyup input[name=name]': 'setName',
                         'click button[name=save]': 'save',
                         'click button[name=cancel]': 'cancel',
                         'submit': 'save'
                     },
                     initialize: function () {
                         this.listenTo(this.model, 'invalid', function(model, error) {
-                            this.$('.form-group').addClass('has-error');
-                            this.$('.help-block').text(error);
+                            this.invalid(error);
                         });
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('created:parent', model);
@@ -212,7 +212,25 @@
                         this.$el.html(this.template());
                         return this;
                     },
-                    save: function(event) {
+                    setName: function (event) {
+                        this.model.set({
+                            Name: this.$(event.currentTarget).val()
+                        });
+                        this.model.isValid()
+                            ? this.valid()
+                            : this.invalid(this.model.validationError);
+                    },
+                    valid: function () {
+                        this.$('button[name=save]').prop('disabled', false);
+                        this.$('.form-group').removeClass('has-error').addClass('has-success');
+                        this.$('.help-block').empty();
+                    },
+                    invalid: function (error) {
+                        this.$('button[name=save]').prop('disabled', true);
+                        this.$('.form-group').removeClass('has-success').addClass('has-error');
+                        this.$('.help-block').text(error);
+                    },
+                    save: function (event) {
                         event.preventDefault();
                         this.model.save({
                             Name: this.$('input[name=name]').val()
@@ -240,14 +258,14 @@
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
+                        'keyup input[name=name]': 'setName',
                         'click button[name=update]': 'update',
                         'click button[name=cancel]': 'cancel',
                         'submit': 'update'
                     },
-                    initialize: function() {
+                    initialize: function () {
                         this.listenTo(this.model, 'invalid', function (model, error) {
-                            this.$('.form-group').addClass('has-error');
-                            this.$('.help-block').text(error);
+                            this.invalid(error);
                         });
                         this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('updated:parent', model);
@@ -259,7 +277,25 @@
                         this.$el.html(this.template(this.model.toJSON()));
                         return this;
                     },
-                    update: function(event) {
+                    setName: function (event) {
+                        this.model.set({
+                            Name: this.$(event.currentTarget).val()
+                        });
+                        this.model.isValid()
+                            ? this.valid()
+                            : this.invalid(this.model.validationError);
+                    },
+                    valid: function () {
+                        this.$('button[name=update]').prop('disabled', false);
+                        this.$('.form-group').removeClass('has-error').addClass('has-success');
+                        this.$('.help-block').empty();
+                    },
+                    invalid: function (error) {
+                        this.$('button[name=update]').prop('disabled', true);
+                        this.$('.form-group').removeClass('has-success').addClass('has-error');
+                        this.$('.help-block').text(error);
+                    },
+                    update: function (event) {
                         event.preventDefault();
                         this.model.save({
                             Name: this.$('input[name=name]').val()
@@ -267,6 +303,7 @@
                     },
                     cancel: function(event) {
                         event.preventDefault();
+                        this.model.set(this.model.previousAttributes());
                         this.trigger('cancelled:parent');
                         this.trigger('alert', 'warning', 'Edit parent ' + this.model.get('Name') + ' cancelled');
                         this.remove();
@@ -326,14 +363,14 @@
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
+                        'keyup input[name=name]': 'setName',
                         'click button[name=save]': 'save',
                         'click button[name=cancel]': 'cancel',
                         'submit': 'save'
                     },
                     initialize: function() {
                         this.listenTo(this.model, 'invalid', function (model, error) {
-                            this.$('.form-group').addClass('has-error');
-                            this.$('.help-block').text(error);
+                            this.invalid(error);
                         });
                         this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('created:child', model);
@@ -345,7 +382,25 @@
                         this.$el.html(this.template());
                         return this;
                     },
-                    save: function(event) {
+                    setName: function (event) {
+                        this.model.set({
+                            Name: this.$(event.currentTarget).val()
+                        });
+                        this.model.isValid()
+                            ? this.valid()
+                            : this.invalid(this.model.validationError);
+                    },
+                    valid: function () {
+                        this.$('button[name=save]').prop('disabled', false);
+                        this.$('.form-group').removeClass('has-error').addClass('has-success');
+                        this.$('.help-block').empty();
+                    },
+                    invalid: function (error) {
+                        this.$('button[name=save]').prop('disabled', true);
+                        this.$('.form-group').removeClass('has-success').addClass('has-error');
+                        this.$('.help-block').text(error);
+                    },
+                    save: function (event) {
                         event.preventDefault();
                         this.model.save({
                             Name: this.$('input[name=name]').val()
@@ -373,14 +428,14 @@
                         '<button type="button" class="btn btn-default" name="cancel">Cancel</button>'
                     ),
                     events: {
+                        'keyup input[name=name]': 'setName',
                         'click button[name=update]': 'update',
                         'click button[name=cancel]': 'cancel',
                         'submit': 'update'
                     },
                     initialize: function() {
                         this.listenTo(this.model, 'invalid', function (model, error) {
-                            this.$('.form-group').addClass('has-error');
-                            this.$('.help-block').text(error);
+                            this.invalid(error);
                         });
                         this.listenToOnce(this.model, 'sync', function (model) {
                             this.trigger('updated:child', model);
@@ -392,6 +447,24 @@
                         this.$el.html(this.template(this.model.toJSON()));
                         return this;
                     },
+                    setName: function(event) {
+                        this.model.set({
+                            Name: this.$(event.currentTarget).val()
+                        });
+                        this.model.isValid()
+                            ? this.valid()
+                            : this.invalid(this.model.validationError);
+                    },
+                    valid: function() {
+                        this.$('button[name=update]').prop('disabled', false);
+                        this.$('.form-group').removeClass('has-error').addClass('has-success');
+                        this.$('.help-block').empty();
+                    },
+                    invalid: function(error) {
+                        this.$('button[name=update]').prop('disabled', true);
+                        this.$('.form-group').removeClass('has-success').addClass('has-error');
+                        this.$('.help-block').text(error);
+                    },
                     update: function(event) {
                         event.preventDefault();
                         this.model.save({
@@ -400,6 +473,7 @@
                     },
                     cancel: function(event) {
                         event.preventDefault();
+                        this.model.set(this.model.previousAttributes());
                         this.trigger('cancelled:child');
                         this.trigger('alert', 'warning', 'Edit child ' + this.model.get('Name') + ' cancelled');
                         this.remove();
