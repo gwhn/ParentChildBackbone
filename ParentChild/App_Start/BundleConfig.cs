@@ -15,10 +15,13 @@ namespace ParentChild
 
             bundles.Add(new ScriptBundle("~/bundles/backbone")
                             .Include("~/Scripts/jquery-{version}.js",
+                                     "~/Scripts/bootstrap.js",
                                      "~/Scripts/underscore.js",
                                      "~/Scripts/backbone.js"));
 
-            bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/site.css"));
+            bundles.Add(new StyleBundle("~/Content/css")
+                            .Include("~/Content/bootstrap.css",
+                                     "~/Content/site.css"));
         }
     }
 }
