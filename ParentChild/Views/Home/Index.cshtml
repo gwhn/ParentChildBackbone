@@ -174,7 +174,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('created:parent', model);
-                            this.trigger('message:created:parent', 'success', 'Parent ' + model.get('Name') + ' created');
+                            this.trigger('alert', 'success', 'Parent ' + model.get('Name') + ' saved');
                             this.remove();
                         });
                     },
@@ -191,6 +191,7 @@
                     cancel: function(event) {
                         event.preventDefault();
                         this.trigger('cancelled:parent');
+                        this.trigger('alert', 'warning', 'Create new parent cancelled');
                         this.remove();
                     }
                 });
@@ -213,7 +214,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('updated:parent', model);
-                            this.trigger('message:updated:parent', 'success', 'Parent ' + model.get('Name') + ' updated');
+                            this.trigger('alert', 'success', 'Parent ' + model.get('Name') + ' updated');
                             this.remove();
                         });
                     },
@@ -230,6 +231,7 @@
                     cancel: function(event) {
                         event.preventDefault();
                         this.trigger('cancelled:parent');
+                        this.trigger('alert', 'warning', 'Edit parent ' + this.model.get('Name') + ' cancelled');
                         this.remove();
                     }
                 });
@@ -251,7 +253,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('destroyed:parent');
-                            this.trigger('message:destroyed:parent', 'success', 'Parent ' + model.get('Name') + ' destroyed');
+                            this.trigger('alert', 'success', 'Parent ' + model.get('Name') + ' destroyed');
                             this.remove();
                         });
                     },
@@ -266,6 +268,7 @@
                     cancel: function(event) {
                         event.preventDefault();
                         this.trigger('cancelled:parent');
+                        this.trigger('alert', 'warning', 'Destroy parent ' + this.model.get('Name') + ' cancelled');
                         this.remove();
                     }
                 });
@@ -288,7 +291,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('created:child', model);
-                            this.trigger('message:created:child', 'success', 'Child ' + model.get('Name') + ' created');
+                            this.trigger('alert', 'success', 'Child ' + model.get('Name') + ' saved');
                             this.remove();
                         });
                     },
@@ -305,6 +308,7 @@
                     cancel: function(event) {
                         event.preventDefault();
                         this.trigger('cancelled:child');
+                        this.trigger('alert', 'warning', 'Create new child cancelled');
                         this.remove();
                     }
                 });
@@ -327,7 +331,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('updated:child', model);
-                            this.trigger('message:updated:child', 'success', 'Child ' + model.get('Name') + ' updated');
+                            this.trigger('alert', 'success', 'Child ' + model.get('Name') + ' updated');
                             this.remove();
                         });
                     },
@@ -344,6 +348,7 @@
                     cancel: function(event) {
                         event.preventDefault();
                         this.trigger('cancelled:child');
+                        this.trigger('alert', 'warning', 'Edit child ' + this.model.get('Name') + ' cancelled');
                         this.remove();
                     }
                 });
@@ -365,7 +370,7 @@
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
                             this.trigger('destroyed:child');
-                            this.trigger('message:destroyed:child', 'success', 'Child ' + model.get('Name') + ' destroyed');
+                            this.trigger('alert', 'success', 'Child ' + model.get('Name') + ' destroyed');
                             this.remove();
                         });
                     },
@@ -380,6 +385,7 @@
                     cancel: function(event) {
                         event.preventDefault();
                         this.trigger('cancelled:child');
+                        this.trigger('alert', 'warning', 'Destroy child ' + this.model.get('Name') + ' cancelled');
                         this.remove();
                     }
                 });
@@ -430,7 +436,7 @@
                             this.collection.add(model);
                         });
                         this.listenTo(view, 'created:parent cancelled:parent', this.render);
-                        this.listenTo(view, 'message:created:parent', this.showMessage);
+                        this.listenTo(view, 'alert', this.showMessage);
                         this.$el.html(view.render().el);
                     },
                     editParent: function(id) {
@@ -438,7 +444,7 @@
                             model: this.collection.get(id)
                         });
                         this.listenTo(view, 'updated:parent cancelled:parent', this.render);
-                        this.listenTo(view, 'message:updated:parent', this.showMessage);
+                        this.listenTo(view, 'alert', this.showMessage);
                         this.$el.html(view.render().el);
                     },
                     destroyParent: function(id) {
@@ -446,7 +452,7 @@
                             model: this.collection.get(id)
                         });
                         this.listenTo(view, 'destroyed:parent cancelled:parent', this.render);
-                        this.listenTo(view, 'message:destroyed:parent', this.showMessage);
+                        this.listenTo(view, 'alert', this.showMessage);
                         this.$el.html(view.render().el);
                     },
                     createChild: function(parentId) {
@@ -456,7 +462,7 @@
                             })
                         });
                         this.listenTo(view, 'created:child cancelled:child', this.render);
-                        this.listenTo(view, 'message:created:child', this.showMessage);
+                        this.listenTo(view, 'alert', this.showMessage);
                         this.$el.html(view.render().el);
                     },
                     editChild: function (id) {
@@ -465,7 +471,7 @@
                                 model: model
                             });
                             this.listenTo(view, 'updated:child cancelled:child', this.render);
-                            this.listenTo(view, 'message:updated:child', this.showMessage);
+                            this.listenTo(view, 'alert', this.showMessage);
                             this.$el.html(view.render().el);
                         });
                     },
@@ -475,7 +481,7 @@
                                 model: model
                             });
                             this.listenTo(view, 'destroyed:child cancelled:child', this.render);
-                            this.listenTo(view, 'message:destroyed:child', this.showMessage);
+                            this.listenTo(view, 'alert', this.showMessage);
                             this.$el.html(view.render().el);
                         });
                     },
