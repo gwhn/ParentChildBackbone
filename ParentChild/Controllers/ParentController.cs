@@ -22,6 +22,14 @@ namespace ParentChild.Controllers
             return _db.Parents.AsEnumerable();
         }
 
+        // GET api/Parent?query=something
+        public IEnumerable<Parent> GetParents(string query)
+        {
+            return _db.Parents
+                .Where(x=>x.Name.Contains(query))
+                .AsEnumerable();
+        }
+
         // GET api/Parent/5
         public Parent GetParent(int id)
         {

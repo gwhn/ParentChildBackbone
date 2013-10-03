@@ -53,7 +53,21 @@
             var Collections = (function() {
                 var Parents = Backbone.Collection.extend({
                     model: Models.Parent,
-                    url: 'api/parent'
+                    url: function() {
+                        if (this.query) {
+                            return 'api/parent?query=' + this.query;
+                        } else {
+                            return 'api/parent';
+                        }
+                    },
+                    search: function(query) {
+                        this.query = query;
+                        this.fetch();
+                    },
+                    all: function() {
+                        this.query = false;
+                        this.fetch();
+                    }
                 });
 
                 var Children = Backbone.Collection.extend({
@@ -548,7 +562,8 @@
                             el: '#search'
                         });
                         this.listenTo(this.search, 'search', function(query) {
-                            alert('search ' + query);
+                            this.listenTo(this.collection, 'sync', this.render);
+                            this.collection.search(query);
                         });
                         this.message = new Message({
                             el: '#message',
