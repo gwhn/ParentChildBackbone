@@ -14,7 +14,7 @@ namespace ParentChild.Controllers
 
         public ActionResult Index()
         {
-            return View(_db.Parents.AsEnumerable());
+            return View(_db.Parents.Take(ParentController.RecordsPerPage).AsEnumerable());
         }
 
         protected override void Dispose(bool disposing)

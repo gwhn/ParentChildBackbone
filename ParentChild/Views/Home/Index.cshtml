@@ -53,12 +53,16 @@
             var Collections = (function() {
                 var Parents = Backbone.Collection.extend({
                     model: Models.Parent,
-                    url: function() {
+                    url: function () {
+                        var root = 'api/parent';
                         if (this.query) {
-                            return 'api/parent?query=' + this.query;
+                            return root + '?query=' + this.query + '&page=' + this.page;
                         } else {
-                            return 'api/parent';
+                            return root + '?page=' + this.page;
                         }
+                    },
+                    initialize: function () {
+                        this.page = 1;
                     },
                     search: function(query) {
                         this.query = query;
@@ -66,6 +70,19 @@
                     },
                     all: function() {
                         this.query = false;
+                        this.fetch();
+                    },
+                    previousPage: function () {
+                        this.changePage(-1);
+                    },
+                    nextPage: function () {
+                        this.changePage(1);
+                    },
+                    changePage: function(delta) {
+                        this.setPage(this.page + delta);
+                    },
+                    setPage: function(page) {
+                        this.page = page;
                         this.fetch();
                     }
                 });
@@ -104,6 +121,14 @@
                             });
                             this.$el.append(view.render().el);
                         }, this);
+                        var paginator = new Paginator();
+                        this.listenTo(paginator, 'page:previous', function() {
+                            this.collection.previousPage();
+                        });
+                        this.listenTo(paginator, 'page:next', function() {
+                            this.collection.nextPage();
+                        });
+                        this.$el.append(paginator.render().el);
                         return this;
                     },
                     createParent: function(event) {
@@ -288,7 +313,7 @@
                         });
                     },
                     render: function () {
-                        this.original = _.clone(this.model.attributes);
+                        this.store();
                         this.$el.html(this.template(this.model.toJSON()));
                         return this;
                     },
@@ -318,10 +343,16 @@
                     },
                     cancel: function(event) {
                         event.preventDefault();
-                        this.model.set(this.original);
+                        this.restore();
                         this.trigger('cancelled:parent');
                         this.trigger('alert', 'warning', 'Edit parent ' + this.model.get('Name') + ' cancelled');
                         this.remove();
+                    },
+                    store: function () {
+                        this.original = _.clone(this.model.attributes);
+                    },
+                    restore: function () {
+                        this.model.set(this.original);
                     }
                 });
 
@@ -459,7 +490,7 @@
                         });
                     },
                     render: function () {
-                        this.original = _.clone(this.model.attributes);
+                        this.store();
                         this.$el.html(this.template(this.model.toJSON()));
                         return this;
                     },
@@ -489,10 +520,16 @@
                     },
                     cancel: function(event) {
                         event.preventDefault();
-                        this.model.set(this.original);
+                        this.restore();
                         this.trigger('cancelled:child');
                         this.trigger('alert', 'warning', 'Edit child ' + this.model.get('Name') + ' cancelled');
                         this.remove();
+                    },
+                    store: function() {
+                        this.original = _.clone(this.model.attributes);
+                    },
+                    restore: function() {
+                        this.model.set(this.original);
                     }
                 });
 
@@ -558,15 +595,36 @@
                     }
                 });
 
+                var Paginator = Backbone.View.extend({
+                    template: _.template(
+                        '<button type="button" class="btn btn-link previous pull-left">Previous</button>' + 
+                        '<button type="button" class="btn btn-link next pull-right">Next</button>'
+                    ),
+                    events: {
+                        'click .previous': 'previous',
+                        'click .next': 'next'
+                    },
+                    render: function() {
+                        this.$el.html(this.template());
+                        return this;
+                    },
+                    previous: function() {
+                        this.trigger('page:previous');
+                    },
+                    next: function() {
+                        this.trigger('page:next');
+                    }
+                });
+                
                 var Application = Backbone.View.extend({
                     initialize: function () {
                         this.search = new Search({
                             el: '#search'
                         });
                         this.listenTo(this.search, 'search', function(query) {
-                            this.listenTo(this.collection, 'sync', this.render);
                             this.collection.search(query);
                         });
+                        this.listenTo(this.collection, 'sync', this.render);
                         this.message = new Message({
                             el: '#message',
                             model: new Models.Alert()

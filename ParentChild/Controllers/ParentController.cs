@@ -14,20 +14,29 @@ namespace ParentChild.Controllers
 {
     public class ParentController : ApiController
     {
+        public const int RecordsPerPage = 10;
+
         private readonly ParentChildContext _db = new ParentChildContext();
 
-        // GET api/Parent
-        public IEnumerable<Parent> GetParents()
-        {
-            return _db.Parents.AsEnumerable();
-        }
-
-        // GET api/Parent?query=something
-        public IEnumerable<Parent> GetParents(string query)
+        // GET api/Parent?query=something&page=1
+        public IEnumerable<Parent> GetParents(string query, int page)
         {
             return _db.Parents
-                .Where(x=>x.Name.Contains(query))
-                .AsEnumerable();
+                      .Where(x => x.Name.Contains(query))
+                      .OrderBy(x => x.Id)
+                      .Skip((page - 1)*RecordsPerPage)
+                      .Take(RecordsPerPage)
+                      .AsEnumerable();
+        }
+
+        // GET api/Parent?page=1
+        public IEnumerable<Parent> GetParents(int page)
+        {
+            return _db.Parents
+                      .OrderBy(x => x.Id)
+                      .Skip((page - 1)*RecordsPerPage)
+                      .Take(RecordsPerPage)
+                      .AsEnumerable();
         }
 
         // GET api/Parent/5
