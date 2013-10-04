@@ -82,8 +82,19 @@
                         this.setPage(this.page + delta);
                     },
                     setPage: function(page) {
+                        this.store();
                         this.page = page;
+                        this.listenToOnce(this, 'error', function () {
+                            this.restore();
+                            this.fetch();
+                        });
                         this.fetch();
+                    },
+                    store: function() {
+                        this.original = this.page;
+                    },
+                    restore: function() {
+                        this.page = this.original;
                     }
                 });
 
