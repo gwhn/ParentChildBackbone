@@ -42,11 +42,16 @@
                 });
 
                 var Alert = Backbone.Model.extend();
+
+                var Meta = Backbone.Model.extend({
+                    url: 'api/parent?meta'
+                });
                 
                 return {
                     Parent: Parent,
                     Child: Child,
-                    Alert: Alert
+                    Alert: Alert,
+                    Meta: Meta
                 };
             })();
 
@@ -82,19 +87,8 @@
                         this.setPage(this.page + delta);
                     },
                     setPage: function(page) {
-                        this.store();
                         this.page = page;
-                        this.listenToOnce(this, 'error', function () {
-                            this.restore();
-                            this.fetch();
-                        });
                         this.fetch();
-                    },
-                    store: function() {
-                        this.original = this.page;
-                    },
-                    restore: function() {
-                        this.page = this.original;
                     }
                 });
 
@@ -110,6 +104,65 @@
             })();
 
             var Views = (function () {
+                var Paginator = Backbone.View.extend({
+                    template: _.template(
+                        '<button type="button" class="btn btn-link previous">&lt;&nbsp;Previous</button>' +
+                        '<span class="pages" />' +
+                        '<button type="button" class="btn btn-link next">Next&nbsp;&gt;</button>'
+                    ),
+                    events: {
+                        'click .previous': 'previousPage',
+                        'click .next': 'nextPage'
+                    },
+                    initialize: function (options) {
+                        this.page = options.page;
+                        this.listenTo(this.model, 'change', this.render);
+                    },
+                    render: function () {
+                        this.$el.html(this.template());
+                        _(this.model.get('PageCount')).chain().range().each(function (page) {
+                            var view = new Page({
+                                page: page + 1
+                            });
+                            this.listenTo(view, 'page:goto', this.gotoPage);
+                            this.$('.pages').append(view.render().el);
+                        }, this);
+                        this.toggleButtons();
+                        return this;
+                    },
+                    previousPage: function () {
+                        this.trigger('page:previous');
+                    },
+                    nextPage: function () {
+                        this.trigger('page:next');
+                    },
+                    gotoPage: function (page) {
+                        this.trigger('page:goto', page);
+                    },
+                    toggleButtons: function() {
+                        this.$('.previous').prop('disabled', this.page == 1);
+                        this.$('.next').prop('disabled', this.page == this.model.get('PageCount'));
+                    }
+                });
+
+                var Page = Backbone.View.extend({
+                    tagName: 'button',
+                    className: 'btn btn-link page',
+                    events: {
+                        'click': 'gotoPage',
+                    },
+                    initialize: function (options) {
+                        this.page = options.page;
+                    },
+                    render: function () {
+                        this.$el.text(this.page);
+                        return this;
+                    },
+                    gotoPage: function () {
+                        this.trigger('page:goto', this.page);
+                    }
+                });
+
                 var ParentsList = Backbone.View.extend({
                     tagName: 'form',
                     template: _.template(
@@ -132,14 +185,24 @@
                             });
                             this.$el.append(view.render().el);
                         }, this);
-                        var paginator = new Paginator();
-                        this.listenTo(paginator, 'page:previous', function() {
-                            this.collection.previousPage();
+                        var meta = new Models.Meta();
+                        this.listenToOnce(meta, 'sync', function(model) {
+                            var paginator = new Paginator({
+                                model: model,
+                                page: this.collection.page
+                            });
+                            this.listenTo(paginator, 'page:previous', function () {
+                                this.collection.previousPage();
+                            });
+                            this.listenTo(paginator, 'page:next', function () {
+                                this.collection.nextPage();
+                            });
+                            this.listenTo(paginator, 'page:goto', function (page) {
+                                this.collection.setPage(page);
+                            });
+                            this.$el.append(paginator.render().el);
                         });
-                        this.listenTo(paginator, 'page:next', function() {
-                            this.collection.nextPage();
-                        });
-                        this.$el.append(paginator.render().el);
+                        meta.fetch();
                         return this;
                     },
                     createParent: function(event) {
@@ -606,27 +669,6 @@
                     }
                 });
 
-                var Paginator = Backbone.View.extend({
-                    template: _.template(
-                        '<button type="button" class="btn btn-link previous pull-left">Previous</button>' + 
-                        '<button type="button" class="btn btn-link next pull-right">Next</button>'
-                    ),
-                    events: {
-                        'click .previous': 'previous',
-                        'click .next': 'next'
-                    },
-                    render: function() {
-                        this.$el.html(this.template());
-                        return this;
-                    },
-                    previous: function() {
-                        this.trigger('page:previous');
-                    },
-                    next: function() {
-                        this.trigger('page:next');
-                    }
-                });
-                
                 var Application = Backbone.View.extend({
                     initialize: function () {
                         this.search = new Search({

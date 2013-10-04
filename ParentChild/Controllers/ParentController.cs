@@ -39,6 +39,21 @@ namespace ParentChild.Controllers
                       .AsEnumerable();
         }
 
+        public dynamic GetParents(string meta)
+        {
+            var recordCount = _db.Parents.Count();
+            var pageCount = recordCount/RecordsPerPage;
+            if (recordCount%RecordsPerPage != 0)
+            {
+                pageCount++;
+            }
+            return new { 
+                RecordsPerPage, 
+                RecordCount = recordCount,
+                PageCount = pageCount
+            };
+        }
+
         // GET api/Parent/5
         public Parent GetParent(int id)
         {
