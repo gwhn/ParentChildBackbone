@@ -646,7 +646,7 @@
                     }
                 });
 
-                var Message = Backbone.View.extend({
+                var message = new (Backbone.View.extend({
                     template: _.template(
                         '<div class="alert alert-{{Type}}">{{Message}}</div>'
                     ),
@@ -657,9 +657,12 @@
                         this.$el.html(this.template(this.model.toJSON()));
                         return this;
                     }
+                }))({
+                    el: '#message',
+                    model: new Models.Alert()
                 });
-                
-                var Search = Backbone.View.extend({
+
+                var search = new (Backbone.View.extend({
                     events: {
                         'submit': 'search'
                     },
@@ -667,21 +670,17 @@
                         event.preventDefault();
                         this.trigger('search', this.$('input[name=query]').val());
                     }
+                }))({
+                    el: '#search'
                 });
 
-                var Application = Backbone.View.extend({
+                var application = new (Backbone.View.extend({
                     initialize: function () {
-                        this.search = new Search({
-                            el: '#search'
-                        });
-                        this.listenTo(this.search, 'search', function(query) {
+                        this.listenTo(search, 'search', function(query) {
                             this.collection.search(query);
                         });
+                        search.render();
                         this.listenTo(this.collection, 'sync', this.render);
-                        this.message = new Message({
-                            el: '#message',
-                            model: new Models.Alert()
-                        });
                     },
                     render: function() {
                         var view = new ParentsList({
@@ -695,11 +694,12 @@
                         this.listenTo(view, 'destroy:child', this.destroyChild);
                         this.$el.html(view.render().el);
                     },
-                    showMessage: function(type, message) {
-                        this.message.model.set({
+                    showMessage: function(type, msg) {
+                        message.model.set({
                             Type: type,
-                            Message: message
+                            Message: msg
                         });
+                        message.render();
                     },
                     createParent: function() {
                         var view = new ParentCreate({
@@ -763,10 +763,15 @@
                         this.listenToOnce(model, 'sync', callback);
                         model.fetch();
                     }
-                });
+                }))({
+                    el: '#application',
+                    collection: new Collections.Parents(
+                        @Html.Raw(Json.Encode(Model))
+                    )
+                }).render();
 
                 return {
-                    Application: Application
+                    application: application
                 };
             })();
 
@@ -783,17 +788,6 @@
             };
 
             var parentChild = new ParentChild();
-
-            var collection = new parentChild.Collections.Parents(
-                @Html.Raw(Json.Encode(Model))
-            );
-
-            var application = new parentChild.Views.Application({
-                el: '#application',
-                collection: collection
-            });
-
-            application.render();
         });
     </script>
 }
