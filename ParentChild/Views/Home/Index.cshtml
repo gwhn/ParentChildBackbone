@@ -731,7 +731,7 @@
                         this.listenTo(view, 'created:child', function(child) {
                             var parent = this.collection.get(child.get('ParentId'));
                             var children = parent.get('Children');
-                            children.push(child);
+                            children.push(child.attributes);
                         });
                         this.listenTo(view, 'created:child cancelled:child', this.render);
                         this.listenTo(view, 'alert', this.showMessage);
@@ -747,7 +747,7 @@
                                 var children = parent.get('Children');
                                 for (var i = 0; i < children.length; i++) {
                                     if (child.get('Id') === children[i].Id) {
-                                        children.splice(i, 1, child);
+                                        children[i] = child.attributes;
                                         break;
                                     }
                                 }
