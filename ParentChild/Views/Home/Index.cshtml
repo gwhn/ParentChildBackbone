@@ -44,7 +44,17 @@
                 var Alert = Backbone.Model.extend();
 
                 var Meta = Backbone.Model.extend({
-                    url: 'api/parent?meta'
+                    url: function() {
+                        var root = 'api/parent?meta';
+                        if (this.query) {
+                            return root + '&query=' + this.query;
+                        } else {
+                            return root;
+                        }
+                    },
+                    initialize: function(options) {
+                        this.query = options.query;
+                    }
                 });
                 
                 return {
@@ -185,7 +195,9 @@
                             });
                             this.$el.append(view.render().el);
                         }, this);
-                        var meta = new Models.Meta();
+                        var meta = new Models.Meta({
+                            query: this.collection.query
+                        });
                         this.listenToOnce(meta, 'sync', function(model) {
                             var paginator = new Paginator({
                                 model: model,

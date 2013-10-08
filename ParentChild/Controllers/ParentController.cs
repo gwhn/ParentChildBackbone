@@ -56,6 +56,21 @@ namespace ParentChild.Controllers
             };
         }
 
+        public dynamic GetParents(string meta, string query)
+        {
+            var recordCount = _db.Parents.Count(x => x.Name.Contains(query));
+            var pageCount = recordCount/RecordsPerPage;
+            if (recordCount%RecordsPerPage != 0)
+            {
+                pageCount++;
+            }
+            return new { 
+                RecordsPerPage, 
+                RecordCount = recordCount,
+                PageCount = pageCount
+            };
+        }
+
         // GET api/Parent/5
         public Parent GetParent(int id)
         {
