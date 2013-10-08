@@ -22,6 +22,7 @@ namespace ParentChild.Controllers
         public IEnumerable<Parent> GetParents(string query, int page)
         {
             return _db.Parents
+                      .Include(x => x.Children)
                       .Where(x => x.Name.Contains(query))
                       .OrderBy(x => x.Id)
                       .Skip((page - 1)*RecordsPerPage)
@@ -33,6 +34,7 @@ namespace ParentChild.Controllers
         public IEnumerable<Parent> GetParents(int page)
         {
             return _db.Parents
+                      .Include(x => x.Children)
                       .OrderBy(x => x.Id)
                       .Skip((page - 1)*RecordsPerPage)
                       .Take(RecordsPerPage)

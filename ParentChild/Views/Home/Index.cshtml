@@ -248,18 +248,12 @@
                     ),
                     render: function() {
                         this.$el.html(this.template(this.model.toJSON()));
-                        var model = new Models.Parent({
-                            Id: this.model.get('Id')
+                        var view = new ChildrenList({
+                            collection: new Collections.Children(
+                                this.model.get('Children')
+                            )
                         });
-                        this.listenToOnce(model, 'sync', function () {
-                            var view = new ChildrenList({
-                                collection: new Collections.Children(
-                                    model.get('Children')
-                                )
-                            });
-                            this.$el.append(view.render().el);
-                        });
-                        model.fetch();
+                        this.$el.append(view.render().el);
                         return this;
                     }
                 });
@@ -625,7 +619,7 @@
                     },
                     initialize: function() {
                         this.listenToOnce(this.model, 'sync', function(model) {
-                            this.trigger('destroyed:child');
+                            this.trigger('destroyed:child', model);
                             this.trigger('alert', 'success', 'Child ' + model.get('Name') + ' destroyed');
                             this.remove();
                         });
@@ -734,6 +728,11 @@
                                 ParentId: parentId
                             })
                         });
+                        this.listenTo(view, 'created:child', function(child) {
+                            var parent = this.collection.get(child.get('ParentId'));
+                            var children = parent.get('Children');
+                            children.push(child);
+                        });
                         this.listenTo(view, 'created:child cancelled:child', this.render);
                         this.listenTo(view, 'alert', this.showMessage);
                         this.$el.html(view.render().el);
@@ -742,6 +741,16 @@
                         this.getChild(id, function(model) {
                             var view = new ChildEdit({
                                 model: model
+                            });
+                            this.listenTo(view, 'updated:child', function(child) {
+                                var parent = this.collection.get(child.get('ParentId'));
+                                var children = parent.get('Children');
+                                for (var i = 0; i < children.length; i++) {
+                                    if (child.get('Id') === children[i].Id) {
+                                        children.splice(i, 1, child);
+                                        break;
+                                    }
+                                }
                             });
                             this.listenTo(view, 'updated:child cancelled:child', this.render);
                             this.listenTo(view, 'alert', this.showMessage);
@@ -752,6 +761,16 @@
                         this.getChild(id, function (model) {
                             var view = new ChildDestroy({
                                 model: model
+                            });
+                            this.listenTo(view, 'destroyed:child', function(child) {
+                                var parent = this.collection.get(child.get('ParentId'));
+                                var children = parent.get('Children');
+                                for (var i = 0; i < children.length; i++) {
+                                    if (child.get('Id') === children[i].Id) {
+                                        children.splice(i, 1);
+                                        break;
+                                    }
+                                }
                             });
                             this.listenTo(view, 'destroyed:child cancelled:child', this.render);
                             this.listenTo(view, 'alert', this.showMessage);
